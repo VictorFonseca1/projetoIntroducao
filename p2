@@ -49,7 +49,7 @@ void enviaPotenciometroESP8266(float ocupacao, float capacidade) {
 int buttonStateIN = 0;
 int buttonStateOUT = 0;
 float capacidade = 20;
-float ocupacao = 18;
+float ocupacao = 0;
 
 
 void setup()
