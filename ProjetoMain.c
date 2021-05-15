@@ -2,7 +2,7 @@ String ssid     	= "Simulator Wifi";  	// SSID to connect to
 String password 	= ""; 				 	// Our virtual wifi has no password (so dont do your banking stuff on this network)
 String host     	= "api.thingspeak.com"; // Open API Requests - Write a Channel Feed
 const int httpPort  = 80;					// Port number
-String uri 			= "/update?api_key=&field1=";
+String uri 			= "/update?api_key=U0U6RJBKU5BNRQOV&field1=";
 
 // Função para criar o shield e conectá-lo
 int setupESP8266(void) {
@@ -26,11 +26,10 @@ int setupESP8266(void) {
 }
  
 // Função para enviar a ...	
-void enviaPotenciometroESP8266(void) {
-  int ocupacao;
+void enviaPotenciometroESP8266(float ocupacao, float capacidade) {
   
-  // Variável para converter o valor de A0 (0 a 100)
-  int temp = map(porcentagem,0,250,0,100); 
+  // Variável para converter o valor de porcentagem
+  int temp = (ocupacao/capacidade) * 100; 
   
   // Construct our HTTP call
   String httpPacket = "GET " + uri + String(temp) + " HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
@@ -49,8 +48,9 @@ void enviaPotenciometroESP8266(void) {
 }
 int buttonStateIN = 0;
 int buttonStateOUT = 0;
-float capacidade = 250;
+float capacidade = 20;
 float ocupacao = 0;
+
 
 void setup()
 {
@@ -65,42 +65,43 @@ void setup()
 
 void loop()
 {
-  // read the state of the pushbutton
+  
   buttonStateIN = digitalRead(2);
   buttonStateOUT = digitalRead(3);
-  // check if pushbutton is pressed. if it is, the
-  // button state is HIGH
+  
   if (buttonStateIN == HIGH) {
     ocupacao++;
   } 
   if (buttonStateOUT == HIGH) {
     ocupacao--;
   }
-  float porcentagem = (float)ocupacao/capacidade;
-  if (porcentagem>=0.8) {
+  
+  if (ocupacao>=(capacidade*0.8)) {
     digitalWrite(13, HIGH);
   }
   else {
     digitalWrite(13, LOW);
   }
-  if (porcentagem>=0.9) {
+  if (ocupacao>=(capacidade*0.9)) {
     digitalWrite(12, HIGH);
   }
   else {
     digitalWrite(12, LOW);
   }
-  if (porcentagem==1) {
+  if (ocupacao>=capacidade) {
     digitalWrite(11, HIGH);
   }
   else {
     digitalWrite(11, LOW);
   }
   delay(10);
-  enviaPotenciometroESP8266();
-  Serial.println(ocupacao);
+  Serial.print(ocupacao);
+  enviaPotenciometroESP8266(ocupacao, capacidade);
+  
+  
   
   
     
     
-  delay(10); // Delay a little bit to improve simulation performance
+  delay(500); // Delay a little bit to improve simulation performance
 }
